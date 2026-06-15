@@ -462,7 +462,10 @@ body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--bg); color:
 
     <!-- POSTOS -->
     <div class="page" id="page-postos">
-      <div class="section-label">Postos Cadastrados</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="section-label" style="margin:0">Postos Cadastrados</div>
+        <button class="btn btn-danger btn-sm" onclick="gerarPDFPostos()"><i class="fas fa-file-pdf"></i> PDF Postos</button>
+      </div>
       <div id="postos-list"></div>
       <div class="empty-state" id="postos-empty" style="display:none">
         <i class="fas fa-map-marker-alt"></i>
@@ -971,8 +974,12 @@ function renderPostos(){
     // Badge mensalidade
     let stMens='';
     const sm=getStatusMensalidade(p);
+    const mesPago=p.ultimoPagamento?p.ultimoPagamento.slice(0,7):'';
+    const mesAtual=new Date().toISOString().slice(0,7);
+    const pagouMes=mesPago===mesAtual;
     if(sm){
-      if(sm.diff<=0) stMens='<span class="badge badge-red">Mensalidade vencida (dia '+sm.dia+')</span>';
+      if(pagouMes) stMens='<span class="badge badge-green">\u2705 Pago em '+fmtDate(p.ultimoPagamento)+'</span>';
+      else if(sm.diff<=0) stMens='<span class="badge badge-red">Mensalidade vencida (dia '+sm.dia+')</span>';
       else if(sm.diff<=5) stMens='<span class="badge badge-amber">Vence em '+sm.diff+'d (dia '+sm.dia+')</span>';
       else stMens='<span class="badge badge-blue">Vence dia '+sm.dia+' ('+sm.diff+'d)</span>';
     }
@@ -996,6 +1003,8 @@ function renderPostos(){
       +'<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:5px">'+stMan+(stMens?' '+stMens:'')+'</div>'
       +'<div class="item-actions">'
       +'<button class="btn btn-outline btn-sm" onclick="editPosto(\''+p.id+'\')"><i class="fas fa-edit"></i> Editar</button>'
+      +(p.mensalidade&&!pagouMes?'<button class="btn btn-green btn-sm" onclick="registrarPagamento(\''+p.id+'\')"><i class="fas fa-check-circle"></i> Pago</button>':'')
+      +(p.mensalidade&&pagouMes?'<button class="btn btn-outline btn-sm" onclick="registrarPagamento(\''+p.id+'\')"><i class="fas fa-redo"></i> Re-pagar</button>':'')
       +'<button class="btn btn-danger btn-sm" onclick="confirmDelete(\'postos\',\''+p.id+'\',\'o posto '+esc(p.nome)+'\')"><i class="fas fa-trash"></i></button>'
       +'</div>'
       +'</div></div>';
